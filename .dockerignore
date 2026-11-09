@@ -1,0 +1,14 @@
+# Keep secrets, generated files, and unrelated frontend/database assets out of the build context.
+.env
+.git
+.venv
+venv
+logs
+images
+ön hazırlık
+.cursorrules
+PROJE_TANIMI.md
+*.md
+__pycache__
+*.py[cod]
+*.log

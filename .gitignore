@@ -1,0 +1,11 @@
+# Local secrets, generated logs, caches, and Python environments.
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+logs/
+*.log
