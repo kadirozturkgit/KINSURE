@@ -1,0 +1,51 @@
+/* Style the secure sign-in experience with the project navy, white, and gray palette. */
+:host { display: block; min-height: 100vh; }
+
+.auth-page { min-height: 100vh; display: grid; grid-template-columns: minmax(360px, 0.94fr) 1.06fr; background: #f7f8fb; }
+.auth-visual { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 100vh; overflow: hidden; padding: 48px clamp(36px, 6vw, 88px); color: #fff; background: linear-gradient(145deg, #0c1837f7, #182a54ed), #111e40; }
+.auth-visual::before,.auth-visual::after { position: absolute; content: ''; pointer-events: none; border: 1px solid rgba(255,255,255,.09); border-radius: 50%; }
+.auth-visual::before { width: 580px; height: 580px; right: -210px; top: 14%; }
+.auth-visual::after { width: 400px; height: 400px; right: -120px; top: 24%; }
+.auth-logo { position: relative; z-index: 1; width: 190px; height: 64px; object-fit: contain; object-position: left center; }
+.visual-copy { position: relative; z-index: 1; max-width: 500px; margin: auto 0; padding: 52px 0; }
+.eyebrow { color: #68799b; font-size: 11px; font-weight: 700; letter-spacing: .14em; }
+.visual-copy .eyebrow { color: #b7c5e1; }
+.visual-copy h1 { margin: 20px 0 18px; font-family: Manrope, sans-serif; font-size: clamp(42px, 5vw, 66px); font-weight: 700; line-height: 1.1; letter-spacing: -.055em; }
+.visual-copy p { max-width: 380px; margin: 0; color: #c3ccde; font-size: 16px; line-height: 1.75; }
+.visual-foot,.panel-foot { position: relative; z-index: 1; color: #a7b2c8; font-size: 10px; font-weight: 600; letter-spacing: .1em; }
+.auth-panel { position: relative; display: grid; place-items: center; padding: 68px 28px 80px; background: #fff; }
+.auth-card { width: min(100%, 420px); }
+.auth-card h2 { margin: 14px 0 8px; color: #16213c; font-family: Manrope, sans-serif; font-size: 29px; letter-spacing: -.04em; }
+.auth-subtitle { margin: 0; color: #7d8799; font-size: 14px; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 30px 0 26px; padding: 5px; border-radius: 10px; background: #f2f4f8; }
+.auth-tabs button { border: 0; border-radius: 7px; padding: 10px 12px; color: #7b8495; background: transparent; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.auth-tabs button.active { color: #172449; background: #fff; box-shadow: 0 1px 5px #15203c12; }
+.field { display: grid; gap: 8px; margin: 17px 0; color: #27344e; font-size: 12px; font-weight: 600; }
+.field input { width: 100%; min-height: 46px; border: 1px solid #e1e5ed; border-radius: 8px; padding: 0 13px; outline: none; color: #1d2943; background: #fff; font: inherit; font-size: 13px; font-weight: 400; transition: border-color .2s, box-shadow .2s; }
+.field input:focus { border-color: #475f9b; box-shadow: 0 0 0 3px #344c8515; }
+.field input::placeholder { color: #b0b7c5; }
+.field small { color: #b84449; font-weight: 500; }
+.password-input { position: relative; display: flex; align-items: center; }
+.password-input input { padding-right: 72px; }
+.password-toggle { position: absolute; right: 12px; border: 0; padding: 5px; color: #54688f; background: transparent; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; border: 0; border-radius: 8px; padding: 0 18px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s, transform .2s; }
+.button:disabled { opacity: .6; cursor: wait; }
+.button-primary { color: #fff; background: #19284f; }
+.button-primary:hover:not(:disabled) { background: #273a70; transform: translateY(-1px); }
+.submit-button { width: 100%; min-height: 48px; margin-top: 12px; }
+.submit-button span { margin-left: auto; font-size: 18px; }
+.alert { border: 1px solid; border-radius: 8px; padding: 11px 13px; font-size: 12px; line-height: 1.5; }
+.alert-error { border-color: #f2d5d4; color: #a0393d; background: #fff8f7; }
+.security-note { display: flex; justify-content: center; gap: 8px; margin-top: 25px; color: #8992a2; font-size: 11px; }
+.security-note span { color: #2f765e; font-size: 15px; }
+.panel-foot { position: absolute; bottom: 28px; color: #a1a8b5; font-size: 9px; letter-spacing: .04em; }
+.mobile-brand { display: none; }
+
+@media (max-width: 760px) {
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-visual { display: none; }
+  .auth-panel { min-height: 100vh; padding: 86px 24px 72px; }
+  .mobile-brand { position: absolute; top: 24px; left: 24px; display: block; }
+  .mobile-brand img { width: 154px; height: 42px; object-fit: contain; object-position: left; }
+  .panel-foot { bottom: 20px; }
+}

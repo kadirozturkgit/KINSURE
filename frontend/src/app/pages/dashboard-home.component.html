@@ -1,0 +1,42 @@
+<!-- Present the insurance overview and navigation shortcuts. -->
+<section class="welcome-row">
+  <div>
+    <span class="eyebrow">GENEL BAKIŞ</span>
+    <h1>İyi günler, {{ username }} <span>👋</span></h1>
+    <p>Sigorta operasyonlarınızın güncel görünümü.</p>
+  </div>
+  <span class="date-badge">{{ todayLabel }}</span>
+</section>
+
+@if (error()) {
+  <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+<section class="summary-grid" aria-label="Kayıt özeti">
+  @for (card of cards; track card.key) {
+    <a class="summary-card" [routerLink]="['/app', card.key]">
+      <span class="card-icon" [class]="card.key">{{ card.icon }}</span>
+      <span class="card-label">{{ card.label }}</span>
+      <strong>{{ loading() ? '—' : totals()[card.key] }}</strong>
+      <span class="card-hint">{{ card.hint }} <span aria-hidden="true">→</span></span>
+    </a>
+  }
+</section>
+
+<section class="section-heading">
+  <div><h2>Hızlı erişim</h2><p>En çok kullandığınız yönetim ekranlarına geçin.</p></div>
+</section>
+<section class="quick-grid">
+  @for (card of quickLinks; track card.key) {
+    <a class="quick-link" [routerLink]="['/app', card.key]">
+      <span class="quick-icon">{{ card.icon }}</span>
+      <span><strong>{{ card.label }}</strong><small>{{ card.description }}</small></span>
+      <span class="quick-arrow">↗</span>
+    </a>
+  }
+</section>
+
+<section class="tip-card">
+  <span class="tip-mark">i</span>
+  <div><strong>Güvenli çalışma alanı</strong><p>Yeni kayıtlarınız, oturum açtığınız kullanıcı adıyla ilişkilendirilir. Oluşturma bilgileri sonradan değiştirilemez.</p></div>
+</section>

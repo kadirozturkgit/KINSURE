@@ -1,0 +1,223 @@
+<!-- Display filterable data tables, validated forms, and customer/policy lookup dialogs. -->
+<section class="page-heading">
+  <div>
+    <span class="eyebrow">KAYIT YÖNETİMİ</span>
+    <h1>{{ definition.title }}</h1>
+    <p>{{ definition.description }}</p>
+  </div>
+  <button class="button button-primary" type="button" (click)="openCreate()">
+    <span aria-hidden="true">＋</span> Yeni {{ definition.singular }}
+  </button>
+</section>
+
+@if (error()) {
+  <div class="alert alert-error" role="alert"><span>!</span>{{ error() }}</div>
+}
+@if (success()) {
+  <div class="alert alert-success" role="status"><span>✓</span>{{ success() }}</div>
+}
+
+<section class="panel search-panel">
+  <div class="panel-heading">
+    <div><h2>Kayıt ara</h2><p>Sonuçları alanlara göre filtreleyin.</p></div>
+    <span class="result-count">{{ loading() ? 'Yükleniyor…' : currentRange }}</span>
+  </div>
+  <form class="filter-form" [formGroup]="searchForm" (ngSubmit)="search()">
+    @for (filter of searchFields; track filter.name) {
+      <label class="filter-field">
+        <span>{{ filter.label }}</span>
+        @if (filter.type === 'select') {
+          <select [formControl]="searchControl(filter.name)">
+            <option value="">{{ filter.blankLabel ?? 'Tümü' }}</option>
+            @for (option of filter.options ?? []; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        } @else {
+          <input [type]="filter.type === 'date' ? 'date' : 'search'" [formControl]="searchControl(filter.name)" [placeholder]="filter.type === 'date' ? '' : 'Ara…'">
+        }
+      </label>
+    }
+    <div class="filter-actions">
+      <button class="button button-primary" type="submit">Ara</button>
+      <button class="button button-quiet" type="button" (click)="clearSearch()">Temizle</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel table-panel">
+  <div class="table-wrap">
+    <table>
+      <thead><tr>@for (column of definition.columns; track column.name) { <th>{{ column.label }}</th> }<th class="actions-heading">İşlem</th></tr></thead>
+      <tbody>
+        @for (record of records(); track primaryValue(record)) {
+          <tr>
+            @for (column of definition.columns; track column.name) {
+              <td>
+                @if (column.name === 'status') {
+                  <span class="status-badge" [class]="stringValue(record[column.name] ?? '').toLowerCase()">{{ displayValue(record, column) }}</span>
+                } @else {
+                  {{ displayValue(record, column) }}
+                }
+              </td>
+            }
+            <td class="row-actions">
+              <button type="button" class="icon-button" [attr.aria-label]="definition.singular + ' kaydını düzenle'" title="Düzenle" (click)="openEdit(record)">✎</button>
+              <button type="button" class="icon-button danger" [attr.aria-label]="definition.singular + ' kaydını sil'" title="Sil" (click)="requestDelete(record)">⌫</button>
+            </td>
+          </tr>
+        } @empty {
+          @if (!loading()) {
+            <tr><td class="empty-state" [attr.colspan]="definition.columns.length + 1">
+              <span class="empty-icon">⌕</span>
+              <strong>Henüz kayıt bulunmuyor</strong>
+              <span>Arama ölçütlerini değiştirebilir veya yeni kayıt ekleyebilirsiniz.</span>
+            </td></tr>
+          }
+        }
+      </tbody>
+    </table>
+    @if (loading()) { <div class="loading-state"><span class="spinner"></span> Kayıtlar yükleniyor…</div> }
+  </div>
+  <footer class="pagination">
+    <span>Sayfa başına {{ pageSize }} kayıt</span>
+    <div><button class="button button-quiet" type="button" [disabled]="offset() === 0 || loading()" (click)="previousPage()">Önceki</button>
+      <strong>Sayfa {{ offset() / pageSize + 1 }}</strong>
+      <button class="button button-quiet" type="button" [disabled]="!canContinue || loading()" (click)="nextPage()">Sonraki</button></div>
+  </footer>
+</section>
+
+@if (editorOpen()) {
+  <div class="overlay" (click)="closeEditor()">
+    <section class="dialog editor-dialog" role="dialog" aria-modal="true" [attr.aria-label]="definition.title" (click)="$event.stopPropagation()">
+      <div class="dialog-heading">
+        <div><span class="eyebrow">{{ editing() ? 'KAYDI DÜZENLE' : 'YENİ KAYIT' }}</span><h2>{{ editing() ? definition.singular + ' bilgilerini güncelle' : 'Yeni ' + definition.singular + ' ekle' }}</h2></div>
+        <button class="icon-button close-button" type="button" aria-label="Pencereyi kapat" (click)="closeEditor()">×</button>
+      </div>
+      <form class="record-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+        @for (field of fields; track field.name) {
+          @if (field.type === 'checkbox') {
+            <label class="check-field"><input type="checkbox" [formControl]="control(field.name)"><span>{{ field.label }}</span></label>
+          } @else if (isPolicyPage && field.name === 'tckn_vkn') {
+            <label class="field">
+              <span>{{ field.label }} <b>*</b></span>
+              <span class="lookup-input"><input type="text" [formControl]="control(field.name)" (input)="customerContext.set(null)" maxlength="11" inputmode="numeric" placeholder="11 haneli kimlik numarası"><button type="button" class="button button-outline" (click)="lookupCustomer()">Müşteri bul</button><button type="button" class="button button-quiet search-trigger" (click)="openCustomerSearch()">Ara</button></span>
+              @if (hasFieldError(field.name)) { <small>{{ fieldError(field.name) }}</small> }
+            </label>
+          } @else if (isClaimPage && field.name === 'policy_id') {
+            <label class="field">
+              <span>{{ field.label }} <b>*</b></span>
+              <span class="lookup-input"><input type="number" min="1" step="1" [formControl]="control(field.name)" (input)="claimPolicyContext.set(null)" placeholder="Poliçe ID girin"><button type="button" class="button button-outline" (click)="lookupPolicy()">Poliçeyi bul</button><button type="button" class="button button-quiet search-trigger" (click)="openPolicySearch()">Ara</button></span>
+              @if (hasFieldError(field.name)) { <small>{{ fieldError(field.name) }}</small> }
+            </label>
+          } @else {
+            <label class="field" [class.full-width]="field.type === 'textarea'">
+              <span>{{ field.label }} @if (field.required) { <b>*</b> }</span>
+              @if (field.type === 'select') {
+                <select [formControl]="control(field.name)">
+                  @if (field.blankLabel) { <option value="">{{ field.blankLabel }}</option> }
+                  @for (option of field.options ?? []; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+                </select>
+              } @else if (field.type === 'textarea') {
+                <textarea [formControl]="control(field.name)" rows="3" [attr.maxlength]="field.maxLength" [placeholder]="field.label + ' girin'"></textarea>
+              } @else {
+                <input [type]="field.type" [formControl]="control(field.name)" [attr.maxlength]="field.maxLength" [attr.min]="field.min ?? null" [attr.step]="field.type === 'number' && field.name !== 'policy_id' ? '0.01' : null" [attr.inputmode]="field.name === 'tckn_vkn' ? 'numeric' : null" [placeholder]="field.type === 'date' ? '' : field.label + ' girin'">
+              }
+              @if (hasFieldError(field.name)) { <small>{{ fieldError(field.name) }}</small> }
+            </label>
+          }
+        }
+
+        @if (isPolicyPage && customerContext(); as customer) {
+          <section class="readonly-card full-width">
+            <div class="readonly-heading"><span>MÜŞTERİ BİLGİLERİ</span><strong>Doğrulandı</strong></div>
+            <div class="readonly-grid">
+              <span><small>TCKN / VKN</small>{{ customer.tckn_vkn }}</span>
+              <span><small>Ad soyad</small>{{ customer.first_name }} {{ customer.last_name }}</span>
+              <span><small>E-posta</small>{{ customer.email || '—' }}</span>
+              <span><small>Doğum tarihi</small>{{ formatDate(customer.birth_date) }}</span>
+            </div>
+          </section>
+        }
+
+        @if (isClaimPage && claimPolicyContext(); as policy) {
+          <section class="readonly-card full-width">
+            <div class="readonly-heading"><span>POLİÇE VE MÜŞTERİ BİLGİLERİ</span><strong>Doğrulandı</strong></div>
+            <div class="readonly-grid">
+              <span><small>Poliçe numarası / ID</small>{{ policy.policy_no || '—' }} / {{ policy.policy_id }}</span>
+              <span><small>Müşteri</small>{{ policy.first_name }} {{ policy.last_name }}</span>
+              <span><small>TCKN / VKN</small>{{ policy.tckn_vkn }}</span>
+              <span><small>E-posta</small>{{ policy.email || '—' }}</span>
+              <span><small>Doğum tarihi</small>{{ formatDate(policy.birth_date) }}</span>
+              <span><small>Ürün / durum</small>{{ policy.product_type }} · {{ policy.status || '—' }}</span>
+              <span><small>Poliçe süresi</small>{{ formatDate(policy.start_date) }} – {{ formatDate(policy.end_date) }}</span>
+              <span><small>Prim</small>{{ formatMoney(policy.premium_amount) }} ₺</span>
+            </div>
+          </section>
+        }
+        @if (lookupError() && (isPolicyPage || isClaimPage)) { <div class="alert alert-error full-width" role="alert">{{ lookupError() }}</div> }
+        @if (form.errors?.['dateRange']) { <div class="alert alert-error full-width">Poliçe bitiş tarihi başlangıç tarihinden sonra olmalıdır.</div> }
+        @if (form.errors?.['paidAmount']) { <div class="alert alert-error full-width">Ödenen tutar, hasar tutarından yüksek olamaz.</div> }
+        <div class="form-actions full-width">
+          <button class="button button-quiet" type="button" (click)="closeEditor()">Vazgeç</button>
+          <button class="button button-primary" type="submit" [disabled]="saving()">{{ saving() ? 'Kaydediliyor…' : editing() ? 'Değişiklikleri kaydet' : 'Kaydı oluştur' }}</button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (lookupOpen()) {
+  <div class="overlay lookup-overlay" (click)="closeLookup()">
+    <section class="dialog lookup-dialog" role="dialog" aria-modal="true" [attr.aria-label]="isPolicyPage ? 'Müşteri ara' : 'Poliçe ara'" (click)="$event.stopPropagation()">
+      <div class="dialog-heading">
+        <div><span class="eyebrow">KAYIT SEÇİMİ</span><h2>{{ isPolicyPage ? 'Müşteri ara' : 'Poliçe ara' }}</h2></div>
+        <button class="icon-button close-button" type="button" aria-label="Pencereyi kapat" (click)="closeLookup()">×</button>
+      </div>
+
+      @if (isPolicyPage) {
+        <div class="lookup-toolbar">
+          <label class="filter-field"><span>TCKN / VKN veya ad soyad</span><input type="search" [value]="customerQuery()" (input)="customerQuery.set($any($event.target).value)" (keydown.enter)="searchCustomers()" placeholder="Arama girin…"></label>
+          <button class="button button-primary" type="button" (click)="searchCustomers()">Müşteri ara</button>
+        </div>
+        <div class="lookup-table-wrap">
+          <table><thead><tr><th>TCKN / VKN</th><th>Ad soyad</th><th>E-posta</th><th>Doğum tarihi</th><th></th></tr></thead>
+            <tbody>@for (record of lookupRecords(); track record.tckn_vkn) {
+              <tr><td>{{ record.tckn_vkn }}</td><td>{{ record.first_name }} {{ record.last_name }}</td><td>{{ record.email || '—' }}</td><td>{{ formatDate(record.birth_date) }}</td><td><button class="button button-outline compact" type="button" (click)="chooseCustomer(record)">Seç</button></td></tr>
+            } @empty { @if (!lookupLoading()) { <tr><td class="modal-empty" colspan="5">Aramanızla eşleşen müşteri bulunamadı.</td></tr> } }</tbody>
+          </table>
+        </div>
+      } @else {
+        <form class="policy-search-grid" [formGroup]="searchForm" (ngSubmit)="searchPolicyLookup()">
+          <label class="filter-field"><span>TCKN / VKN</span><input type="search" [formControl]="policySearchControl('tckn_vkn')" placeholder="Müşteri kimlik numarası"></label>
+          <label class="filter-field"><span>Ürün türü</span><select [formControl]="policySearchControl('product_type')"><option value="">Tümü</option>@for (option of productTypeOptions(); track option.value) { <option [value]="option.value">{{ option.label }}</option> }</select></label>
+          <label class="filter-field"><span>Başlangıç</span><input type="date" [formControl]="policySearchControl('start_date')"></label>
+          <label class="filter-field"><span>Bitiş</span><input type="date" [formControl]="policySearchControl('end_date')"></label>
+          <label class="filter-field"><span>Durum</span><select [formControl]="policySearchControl('status')"><option value="">Tümü</option><option value="ACTIVE">Aktif</option><option value="CANCELLED">İptal edildi</option><option value="EXPIRED">Süresi doldu</option></select></label>
+          <button class="button button-primary" type="submit">Poliçe ara</button>
+        </form>
+        <div class="lookup-table-wrap">
+          <table><thead><tr><th>Poliçe ID / numarası</th><th>TCKN / VKN</th><th>Ürün</th><th>Başlangıç</th><th>Bitiş</th><th>Durum</th><th></th></tr></thead>
+            <tbody>@for (record of lookupRecords(); track record.policy_id) {
+              <tr><td>{{ record.policy_id }} / {{ record.policy_no || '—' }}</td><td>{{ record.tckn_vkn }}</td><td>{{ record.product_type }}</td><td>{{ formatDate(record.start_date) }}</td><td>{{ formatDate(record.end_date) }}</td><td>{{ record.status || '—' }}</td><td><button class="button button-outline compact" type="button" (click)="choosePolicy(record)">Seç</button></td></tr>
+            } @empty { @if (!lookupLoading()) { <tr><td class="modal-empty" colspan="7">Aramanızla eşleşen poliçe bulunamadı.</td></tr> } }</tbody>
+          </table>
+        </div>
+      }
+      @if (lookupError()) { <div class="alert alert-error" role="alert">{{ lookupError() }}</div> }
+      @if (lookupLoading()) { <div class="lookup-loading"><span class="spinner"></span> Aranıyor…</div> }
+      <div class="form-actions"><button class="button button-quiet" type="button" (click)="closeLookup()">Kapat</button></div>
+    </section>
+  </div>
+}
+
+@if (pendingDelete(); as record) {
+  <div class="overlay" (click)="cancelDelete()">
+    <section class="dialog confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title" (click)="$event.stopPropagation()">
+      <span class="confirm-icon">!</span>
+      <h2 id="delete-title">Kaydı silmek istiyor musunuz?</h2>
+      <p><strong>{{ primaryValue(record) }}</strong> anahtarlı {{ definition.singular }} kaydı silinecek. Bu işlem geri alınamaz.</p>
+      <div class="form-actions"><button class="button button-quiet" type="button" (click)="cancelDelete()">Vazgeç</button><button class="button button-danger" type="button" (click)="confirmDelete()">Kaydı sil</button></div>
+    </section>
+  </div>
+}

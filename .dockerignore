@@ -4,7 +4,6 @@
 .venv
 venv
 logs
-images
 ön hazırlık
 .cursorrules
 PROJE_TANIMI.md
@@ -12,3 +11,7 @@ PROJE_TANIMI.md
 __pycache__
 *.py[cod]
 *.log
+**/node_modules
+**/dist
+**/.angular
+**/coverage

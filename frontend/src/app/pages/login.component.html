@@ -1,0 +1,79 @@
+<!-- Render account access, registration, and password visibility controls. -->
+<main class="auth-page">
+  <section class="auth-visual" aria-label="KINSURE sigorta yönetimi">
+    <img class="auth-logo" src="assets/images/logo.png" alt="KINSURE">
+    <div class="visual-copy">
+      <span class="eyebrow">GÜVENLE YÖNETİN</span>
+      <h1>Sigortacılığın<br>yeni merkezi.</h1>
+      <p>Poliçelerden hasarlara, tüm iş akışlarınız tek ve güvenli bir yerde.</p>
+    </div>
+    <span class="visual-foot">KINSURE · SİGORTA YÖNETİM SİSTEMİ</span>
+  </section>
+
+  <section class="auth-panel">
+    <a class="mobile-brand" routerLink="/login"><img src="assets/images/logo.png" alt="KINSURE"></a>
+    <div class="auth-card">
+      <span class="eyebrow">KINSURE YÖNETİM PLATFORMU</span>
+      <h2>{{ mode() === 'login' ? 'Tekrar hoş geldiniz' : 'Hesabınızı oluşturun' }}</h2>
+      <p class="auth-subtitle">
+        {{ mode() === 'login' ? 'Hesabınıza giriş yaparak devam edin.' : 'Yeni kullanıcı kaydınızı birkaç adımda tamamlayın.' }}
+      </p>
+
+      <div class="auth-tabs" role="tablist" aria-label="Hesap işlemi">
+        <button type="button" role="tab" [attr.aria-selected]="mode() === 'login'" [class.active]="mode() === 'login'" (click)="setMode('login')">Giriş yap</button>
+        <button type="button" role="tab" [attr.aria-selected]="mode() === 'register'" [class.active]="mode() === 'register'" (click)="setMode('register')">Yeni hesap</button>
+      </div>
+
+      @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        @if (mode() === 'register') {
+          <label class="field">
+            <span>Ad soyad</span>
+            <input type="text" formControlName="full_name" autocomplete="name" placeholder="Adınız Soyadınız" maxlength="100">
+            @if (form.controls.full_name.touched && form.controls.full_name.invalid) {
+              <small>Ad ve soyad alanı zorunludur.</small>
+            }
+          </label>
+        }
+        <label class="field">
+          <span>Kullanıcı adı</span>
+          <input type="text" formControlName="username" autocomplete="username" placeholder="Kullanıcı adınızı girin" maxlength="20">
+          @if (form.controls.username.touched && form.controls.username.invalid) {
+            <small>1–20 karakter uzunluğunda bir kullanıcı adı girin.</small>
+          }
+        </label>
+        @if (mode() === 'register') {
+          <label class="field">
+            <span>E-posta</span>
+            <input type="email" formControlName="email" autocomplete="email" placeholder="ornek@firma.com" maxlength="100">
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+              <small>Geçerli bir e-posta adresi girin.</small>
+            }
+          </label>
+        }
+        <label class="field">
+          <span>Şifre</span>
+          <span class="password-input">
+            <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="En az 8 karakter" maxlength="128">
+            <button type="button" class="password-toggle" [attr.aria-label]="showPassword() ? 'Şifreyi gizle' : 'Şifreyi göster'" (click)="togglePassword()">
+              {{ showPassword() ? 'Gizle' : 'Göster' }}
+            </button>
+          </span>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <small>Şifre en az 8 karakter olmalıdır.</small>
+          }
+        </label>
+
+        <button class="button button-primary submit-button" type="submit" [disabled]="busy()">
+          {{ busy() ? 'Lütfen bekleyin…' : mode() === 'login' ? 'Güvenli giriş' : 'Hesap oluştur' }}
+          <span aria-hidden="true">→</span>
+        </button>
+      </form>
+      <p class="security-note"><span aria-hidden="true">◈</span> Bilgileriniz güvenli bağlantı ile korunur.</p>
+    </div>
+    <span class="panel-foot">© 2026 KINSURE · Tüm hakları saklıdır</span>
+  </section>
+</main>
