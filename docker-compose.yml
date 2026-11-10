@@ -1,4 +1,22 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kinsure-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_DSN: oracle:1521/FREEPDB1
+      LOG_DIRECTORY: /app/logs
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      oracle:
+        condition: service_healthy
   oracle:
     image: gvenzl/oracle-free:23.26.3-slim
     container_name: kinsure-oracle-23

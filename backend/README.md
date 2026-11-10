@@ -10,9 +10,10 @@ expects the tables in `sql/schema.sql` to be installed in the target schema.
    `docker compose --env-file backend/.env up -d oracle`.
 3. Apply `backend/sql/schema.sql` once to the Oracle schema if it has not already
    been imported.
-4. Install project-root `requirements.txt` and run
-   `uvicorn app.main:app --app-dir backend --reload`.
-5. Open `/docs` for the Turkish CRUD and authentication endpoints.
+4. Start the API with
+   `docker compose --env-file backend/.env up -d --build backend`.
+5. Open `http://localhost:8000/docs` for the Turkish CRUD and authentication
+   endpoints.
 
 All data-changing API endpoints require a bearer token. New customer, policy,
 and claim records receive `CREATED_BY` from the authenticated token rather than
