@@ -1,0 +1,23 @@
+services:
+  oracle:
+    image: gvenzl/oracle-free:23.26.3-slim
+    container_name: kinsure-oracle-23
+    ports:
+      - "1522:1521"
+    environment:
+      ORACLE_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in backend/.env}
+      APP_USER: ${DATABASE_USER:?Set DATABASE_USER in backend/.env}
+      APP_USER_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in backend/.env}
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  oracle-data:
+    external: true
+    name: kinsure-oracle-23-data

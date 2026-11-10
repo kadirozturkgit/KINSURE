@@ -4,6 +4,7 @@ from collections.abc import Generator, Mapping, Sequence
 from typing import Any
 
 import oracledb
+
 from fastapi import HTTPException
 
 from .config import settings
