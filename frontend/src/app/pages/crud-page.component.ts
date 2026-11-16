@@ -13,7 +13,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { errorMessage } from '../core/auth.service';
 import { entityDefinition } from '../core/entity-definitions';
-import { formatDate, formatMoney, toApiDate, toInputDate } from '../core/formatters';
+import { formatDate, formatMoney, toApiDate, toInputDate, todayInIstanbul } from '../core/formatters';
 import {
   ApiRecord,
   ClaimPolicyContext,
@@ -108,7 +108,7 @@ export class CrudPageComponent implements OnInit {
   }
 
   get dateToday(): string {
-    return new Date().toISOString().slice(0, 10);
+    return todayInIstanbul();
   }
 
   get canContinue(): boolean {

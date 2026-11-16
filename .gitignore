@@ -1,5 +1,7 @@
 # Local secrets, generated logs, caches, and Python environments.
 .env
+*.env
+**/*.env
 .venv/
 venv/
 __pycache__/

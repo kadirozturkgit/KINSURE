@@ -99,11 +99,13 @@ def create_claim(
             """,
             {
                 **claim.model_dump(),
+                "incident_date": claim.incident_date,
+                "claim_date": claim.claim_date,
                 "created_by": created_by,
                 "claim_id": claim_id_variable,
             },
         )
-        claim_id = int(claim_id_variable.getvalue())
+        claim_id = int(claim_id_variable.getvalue()[0])
     connection.commit()
     created_claim = get_claim(connection, claim_id)
     if created_claim is None:
@@ -125,6 +127,9 @@ def update_claim(
             status_code=400,
             detail="Güncellenecek en az bir alan gönderilmelidir.",
         )
+    for field in ("incident_date", "claim_date"):
+        if field in values:
+            values[field] = getattr(changes, field)
     columns = {
         "policy_id": "POLICY_ID",
         "incident_date": "INCIDENT_DATE",

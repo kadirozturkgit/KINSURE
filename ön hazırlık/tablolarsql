@@ -1,0 +1,183 @@
+DROP TABLE USERSINS;
+CREATE TABLE USERSINS 
+(
+  USERNAME VARCHAR2(20 BYTE) NOT NULL 
+, PASSWORD_HASH VARCHAR2(255 BYTE) NOT NULL 
+, FULL_NAME VARCHAR2(100 BYTE) NOT NULL 
+, EMAIL VARCHAR2(100 BYTE) NOT NULL 
+, ROLE VARCHAR2(20 BYTE) DEFAULT 'USER' 
+, IS_ACTIVE NUMBER(1, 0) DEFAULT 1 
+, CREATED_AT TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP 
+, UPDATED_AT TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP );
+
+alter table USERSINS
+modýfy(USERNAME     VARCHAR2(20 BYTE) );
+
+desc USERSINS;
+
+DROP TABLE POLICIES; 
+CREATE TABLE POLICIES (
+    POLICY_ID      NUMBER NOT NULL,
+    POLICY_NO      VARCHAR2(30 BYTE)  NULL,
+    TCKN_VKN    VARCHAR2(11 BYTE) NOT NULL,
+    PRODUCT_TYPE   VARCHAR2(5 BYTE) NOT NULL,
+    START_DATE     DATE NOT NULL,
+    END_DATE       DATE NOT NULL,
+    PREMIUM_AMOUNT NUMBER(15, 2) NOT NULL,
+    STATUS         VARCHAR2(20 BYTE) DEFAULT 'ACTIVE',
+    CREATED_BY     VARCHAR2(20 BYTE) NOT NULL,
+    CREATED_AT     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+alter table POLICIES
+modýfy(CREATED_BY     VARCHAR2(20 BYTE) );
+
+DESC POLICIES;
+DROP TABLE CUSTOMERS;
+CREATE TABLE CUSTOMERS (
+    TCKN_VKN    VARCHAR2(11 BYTE) NOT NULL,
+    FIRST_NAME  VARCHAR2(50 BYTE) NOT NULL,
+    LAST_NAME   VARCHAR2(50 BYTE) NOT NULL,
+    EMAIL       VARCHAR2(100 BYTE),
+    PHONE       VARCHAR2(20 BYTE) NOT NULL,
+    BIRTH_DATE  DATE,
+    GENDER      CHAR(1 BYTE),
+    ADDRESS     VARCHAR2(500 BYTE),
+    CREATED_BY  VARCHAR2(20 BYTE) NOT NULL,
+    CREATED_AT  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CUSTOMER_ID NUMBER
+);
+
+alter table CUSTOMERS
+modýfy(CREATED_BY     VARCHAR2(20 BYTE) );
+
+select * from CUSTOMERS;
+
+desc CUSTOMERS;
+
+DROP TABLE CLAIMS; 
+
+CREATE TABLE CLAIMS (
+    CLAIM_ID      NUMBER NOT NULL,
+    CLAIM_NO      VARCHAR2(30 BYTE) NOT NULL,
+    POLICY_ID     NUMBER NOT NULL,
+    INCIDENT_DATE DATE NOT NULL,
+    CLAIM_DATE    DATE DEFAULT SYSDATE NOT NULL,
+    CLAIM_AMOUNT  NUMBER(15, 2) NOT NULL,
+    PAID_AMOUNT   NUMBER(15, 2) DEFAULT 0,
+    STATUS        VARCHAR2(20 BYTE) DEFAULT 'OPEN',
+    DESCRIPTION   VARCHAR2(1000 BYTE),
+    CREATED_BY    VARCHAR2(20 BYTE) NOT NULL,
+    CREATED_AT    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+alter table CLAIMS
+modýfy(CREATED_BY     VARCHAR2(20 BYTE) );
+select * from CLAIMS;
+
+desc claims;
+
+drop table PRODUCT_TYPES;
+
+CREATE TABLE PRODUCT_TYPES (
+    PRODUCT_TYPE VARCHAR2(5 BYTE) NOT NULL,
+    PRODUCT_NAME VARCHAR2(50 BYTE) NOT NULL
+);
+
+
+-----------TRIGGER TRG_POLICIES_BI
+BEFORE INSERT ON POLICIES
+FOR EACH ROW
+DECLARE
+    v_seq_val NUMBER;
+BEGIN
+    -- 1. POLICY_ID boþ ise sequence'den sýradaki deðeri al
+    IF :NEW.POLICY_ID IS NULL THEN
+        SELECT SEQ_POLICIES.NEXTVAL INTO v_seq_val FROM DUAL;
+        :NEW.POLICY_ID := v_seq_val;
+    ELSE
+        v_seq_val := :NEW.POLICY_ID;
+    END IF;
+
+    -- 2. POLICY_NO boþ gönderildiyse, PRODUCT_TYPE'a göre kuralý uygula
+    IF :NEW.POLICY_NO IS NULL THEN
+        IF :NEW.PRODUCT_TYPE = 'K' THEN
+            -- Kasko için ID + 10000 (Örn: K-20000)
+            :NEW.POLICY_NO :=  TO_CHAR(v_seq_val + 10000);
+            
+        ELSIF :NEW.PRODUCT_TYPE = 'T' THEN
+            -- Trafik için ID + 20000
+            :NEW.POLICY_NO := TO_CHAR(v_seq_val + 20000);
+            
+        ELSIF :NEW.PRODUCT_TYPE = 'YE' THEN
+            -- Yangýn Endüstriyel için ID + 30000
+            :NEW.POLICY_NO :=  TO_CHAR(v_seq_val + 30000);
+            
+        ELSIF :NEW.PRODUCT_TYPE = 'YB' THEN
+            -- Yangýn Bireysel için ID + 40000
+            :NEW.POLICY_NO :=  TO_CHAR(v_seq_val + 40000);
+            
+        ELSIF :NEW.PRODUCT_TYPE = 'KO' THEN
+            -- Konut için ID + 90000
+            :NEW.POLICY_NO :=TO_CHAR(v_seq_val + 90000);
+            
+        ELSE
+            -- Tanýmlý harici bir tip gelirse varsayýlan
+            :NEW.POLICY_NO := 'POL-' || TO_CHAR(v_seq_val);
+        END IF;
+    END IF;
+END;
+
+----------------
+
+TRIGGER TRG_CUSTOMERS_BI
+BEFORE INSERT ON CUSTOMERS
+FOR EACH ROW
+BEGIN
+    
+    -- Eðer tarih gönderilmediyse anlýk zamaný bas
+    IF :NEW.CREATED_AT IS NULL THEN
+        :NEW.CREATED_AT := CURRENT_TIMESTAMP;
+    END IF;
+END;
+
+TRIGGER TRG_CLAIMS_BI
+BEFORE INSERT ON CLAIMS
+FOR EACH ROW
+DECLARE
+    v_seq_val      NUMBER;
+    v_product_type VARCHAR2(5);
+    v_current_year VARCHAR2(4);
+    v_count        NUMBER;
+BEGIN
+    -- 1. POLICY_ID kontrolü: POLICIES tablosunda var mý?
+    SELECT COUNT(*) 
+    INTO v_count 
+    FROM POLICIES 
+    WHERE POLICY_ID = :NEW.POLICY_ID;
+
+    IF v_count = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Hata: Girilen POLICY_ID ( ' || :NEW.POLICY_ID || ' ) POLICIES tablosunda bulunamadý!');
+    END IF;
+
+    -- 2. Ýlgili poliçenin PRODUCT_TYPE bilgisini al
+    SELECT PRODUCT_TYPE 
+    INTO v_product_type 
+    FROM POLICIES 
+    WHERE POLICY_ID = :NEW.POLICY_ID;
+
+    -- 3. CLAIM_ID boþ ise sequence'den sýradaki deðeri al
+    IF :NEW.CLAIM_ID IS NULL THEN
+        SELECT SEQ_CLAIMS.NEXTVAL INTO v_seq_val FROM DUAL;
+        :NEW.CLAIM_ID := v_seq_val;
+    ELSE
+        v_seq_val := :NEW.CLAIM_ID;
+    END IF;
+
+    -- 4. Güncel yýl bilgisini al
+    SELECT TO_CHAR(SYSDATE, 'YYYY') INTO v_current_year FROM DUAL;
+
+    -- 5. CLAIM_NO oluþturma kuralý: "Yýl + Boþluk + PRODUCT_TYPE + Boþluk + CLAIM_ID"
+    -- Örnek: "2026 K 50000"
+    IF :NEW.CLAIM_NO IS NULL THEN
+        :NEW.CLAIM_NO := v_current_year || ' ' || v_product_type || ' ' || TO_CHAR(v_seq_val);
+    END IF;
+END;

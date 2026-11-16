@@ -1,0 +1,118 @@
+aşağıda detayı verilen her tablo için bir CRUD işlemleri yapan bir api servisi oluşturulacak.
+
+usersins tablosu için username primary bir alan olacak.
+arama işlemi username veya full_name ile yapılabilecek.
+password_hash alanı yeni bir kayıt oluşturulduğunda yada güncelleme yapıldığında kuvvetli bir hash fonksiyonundan geçirilerek veri tabanına kayıt edilecek.
+USERNAME
+PASSWORD_HASH
+FULL_NAME
+EMAIL
+ROLE alanları girilmesi zorunlu alanlar olacak.
+
+usersins
+
+Name          Null?    Type          
+------------- -------- ------------- 
+USERNAME      NOT NULL VARCHAR2(20)  
+PASSWORD_HASH NOT NULL VARCHAR2(255) 
+FULL_NAME     NOT NULL VARCHAR2(100) 
+EMAIL         NOT NULL VARCHAR2(100) 
+ROLE                   VARCHAR2(20)  
+IS_ACTIVE              NUMBER(1)     
+CREATED_AT             TIMESTAMP(6)  
+UPDATED_AT             TIMESTAMP(6)  
+
+
+product_types
+Name         Null?    Type         
+------------ -------- ------------ 
+PRODUCT_TYPE NOT NULL VARCHAR2(5)  
+PRODUCT_NAME NOT NULL VARCHAR2(50) 
+
+policies
+
+Name           Null?    Type         
+-------------- -------- ------------ 
+POLICY_ID      NOT NULL NUMBER       
+POLICY_NO               VARCHAR2(30) 
+TCKN_VKN       NOT NULL VARCHAR2(11) 
+PRODUCT_TYPE   NOT NULL VARCHAR2(5)  
+START_DATE     NOT NULL DATE         
+END_DATE       NOT NULL DATE         
+PREMIUM_AMOUNT NOT NULL NUMBER(15,2) 
+STATUS                  VARCHAR2(20) 
+CREATED_BY              VARCHAR2(20) 
+CREATED_AT              TIMESTAMP(6) 
+
+
+customers
+
+Name       Null?    Type          
+---------- -------- ------------- 
+TCKN_VKN   NOT NULL VARCHAR2(11)  
+FIRST_NAME NOT NULL VARCHAR2(50)  
+LAST_NAME  NOT NULL VARCHAR2(50)  
+EMAIL               VARCHAR2(100) 
+PHONE      NOT NULL VARCHAR2(20)  
+BIRTH_DATE          DATE          
+GENDER              CHAR(1)       
+ADDRESS             VARCHAR2(500) 
+CREATED_BY          VARCHAR2(20)  
+CREATED_AT          TIMESTAMP(6)         
+
+Name          Null?    Type           
+------------- -------- -------------- 
+CLAIM_ID      NOT NULL NUMBER         
+CLAIM_NO      NOT NULL VARCHAR2(30)   
+POLICY_ID     NOT NULL NUMBER         
+INCIDENT_DATE NOT NULL DATE           
+CLAIM_DATE    NOT NULL DATE           
+CLAIM_AMOUNT  NOT NULL NUMBER(15,2)   
+PAID_AMOUNT            NUMBER(15,2)   
+STATUS                 VARCHAR2(20)   
+DESCRIPTION            VARCHAR2(1000) 
+CREATED_BY             VARCHAR2(20)   
+CREATED_AT             TIMESTAMP(6)   
+
+
+
+proje geneli aşağıdaki gibi olacak.
+ Tüm mesaj ve uyarılar Türkçe olacak.
+
+giriş ekranı;
+   usersins tablosunda yer alan kullanıcı adı ve şifresi doğru ise programa girişe izin verecek.
+   şifre alanı yıldızla maskelenecek eğer istenirse kullanıcı bunu görebilecek.
+   kullanıcı usersins tablosunda yoksa ve yeni bir kullanıcı ise yeni kayıt oluşturabilecek.
+   kullanıcı adı ve şifre doğru ise programa girebilecek. ve menü açılacak.
+
+menüde ; usersins, customer, product_types, policies ve claims tabloları üzerinde 
+	 yeni kayıt ekleme, kayıt güncelleme, kayıt silme ve kayıt sorgulama işlemleri yapabilen şık bir ekran olacak. 
+	 Tüm alanların validasyonlarına dikkat edilecek ve hatalı işlemlerde yapılan hata,
+	 Türkçe olarak ekranda gösterilecek.
+	giriş ekranında USERNAME olarak girilen değer tüm ekranlarda yeni kayıt oluşturulduğunda otomatik olarak CREATED_BY alanına atanacak. güncelleme ve silme işlemlerinde bu alanda değişiklik yapılmayacak.
+
+customer ekranı;
+GENDER = cinsiyet alanı; 
+  Erkek = E,
+  Kadın = K,
+  Belirtmek istemiyor =X şeklinde listboxdan seçilecek.
+  BIRTH_DATE = Doğum Tarihi bir calender (takvim) üzerinden seçilebilecek. kullanıcı isterse gün ay yıl şeklinde elle de girebilecek.  
+
+policies ekranı ;
+  TCKN_VKN el ile doldurulabilecek.
+  Girilen TCKN_VKN ye ait bir kayıt customer tablosunda varsa bu TCKN_VKN ye ait TCKN_VKN, FIRST_NAME, LAST_NAME, EMAIL, BIRTH_DATE alanları ekranda uygun bir şekilde gösterilecek. Bu alanlar edit edilemeyecek.
+  TCKN_VKN ye ait bir kayıt customer tablosunda yoksa "müşteri bulunmadı" hatası verilecek.
+  Bu alanın yanında bir buton olacak ve butona basıldığında müşteri tablosu üzerinde arama 		 yapılabilen, kayıt bulunduğunda ve onaylandığında ilgili TCKN_VKN yi dolduran küçük bir arama ekranı açılacak. Bu ekranda sadece sorgulamaya izin veren TCKN_VKN, FIRST_NAME, LAST_NAME, EMAIL, BIRTH_DATE  alanları olacak.
+  
+   PRODUCT_TYPE alanı bir lisbox olacak ve product_types tablosundan seçilecek.
+   
+   START_DATE ve END_DATE  alanları bir calender (takvim) üzerinden seçilebilecek. kullanıcı isterse gün ay yıl şeklinde elle de girebilecek. 
+
+
+claims ekranı:
+
+  POLICY_ID   el ile girilebilecek. eğer bu alana girilen değer policies tablosunda varsa, policies tablosunda yer alan POLICY_NO ya ait olan tüm bilgiler bu ekranda uygun bir şekilde gösterilecek ve edit edilemeyecek. eğer bu alana girilen değer policies tablosunda  yoksa poliçe bulunamadı mesajı verecek. Bu alanın yanında bir "poliçe bul" butonu olacak ve bu butona tıklandığında arama işleminin yapılacağı bir pencere açılacak. 
+Bu pencerede policies tablosu üzerinde TCKN_VKN , PRODUCT_TYPE, START_DATE ,END_DATE ve STATUS alanları olacak ve bu alanlar üzerinde arama yapılabilecek. Bir kayıt seçildiğinde o kayda ait POLICY_ID claim ekranı üzerindeki POLICY_ID alanına atılacak. doğru bir POLICY_ID seçildiğinde poliçenin sahibi olam müşterinin bilgileri de edit edilmeyecek şekilde ekran üzerinde gösterilecek. müşteri bilgilerinde sadece  TCKN_VKN, FIRST_NAME, LAST_NAME, EMAIL, BIRTH_DATE           alanları gösterilecek.
+
+	INCIDENT_DATE ve  CLAIM_DATE   alanları bir calender (takvim) üzerinden seçilebilecek. kullanıcı isterse gün ay yıl şeklinde elle de girebilecek.
+

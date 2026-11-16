@@ -88,6 +88,7 @@ def create_customer(
         """,
         {
             **customer.model_dump(),
+            "birth_date": customer.birth_date,
             "email": str(customer.email) if customer.email is not None else None,
             "created_by": created_by,
         },
@@ -112,6 +113,8 @@ def update_customer(
             status_code=400,
             detail="Güncellenecek en az bir alan gönderilmelidir.",
         )
+    if "birth_date" in values:
+        values["birth_date"] = changes.birth_date
     columns = {
         "first_name": "FIRST_NAME",
         "last_name": "LAST_NAME",

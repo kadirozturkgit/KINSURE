@@ -20,7 +20,8 @@ export class DashboardHomeComponent implements OnInit {
   readonly todayLabel = new Intl.DateTimeFormat('tr-TR', {
     day: '2-digit',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'Europe/Istanbul'
   }).format(new Date());
   readonly totals = signal<Record<ResourceKey, number>>({
     usersins: 0,

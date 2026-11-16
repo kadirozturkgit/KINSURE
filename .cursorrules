@@ -1,0 +1,36 @@
+# Proje Genel Yapısı ve Teknolojiler
+- Proje Adı: KINSURE (Sigortacılık Yönetim Sistemi)
+- Proje Kök Dizini: C:\Kadir\KINSURE (Tüm geliştirme bu klasör içinde yapılacak)
+- Backend: Python 3.10, FastAPI, Pydantic V2
+- Frontend: Angular, Node.js
+- Veritabanı: Oracle Database (Docker üzerinde çalışacak)
+- Konteyner Yapısı: Backend, Frontend ve Veritabanı Docker ve Docker Compose ile yönetilecek.
+
+# Veritabanı ve Bağlantı Kuralları
+- Oracle veritabanı bağlantıları için güncel `oracledb` kütüphanesini (Thin Mode) kullan; harici Instant Client bağımlılığından kaçın.
+- Veritabanı bağlantı şifreleri ve hassas bilgiler kesinlikle `.env` dosyasında tutulacak ve `.gitignore`'a eklenecektir.
+- SQL sorgularında SQL Injection'ı önlemek için her zaman bind variable (parametrik sorgu) kullan.
+- Oracle sorgularında performanslı ve optimize edilmiş SQL kalıpları tercih et.
+
+# Veri Tipleri ve Formatlama Standartları
+- Sayısal değerler (finansal tutarlar vb.) için `decimal.Decimal` kullan; virgülden sonra 2 haneli sakla ve göster.
+- Metin değerleri `str`, boolean değerleri `bool`, liste değerleri `list`, sözlük değerleri `dict` olarak tip belirteçleri (type hints) ile tanımla.
+- Tarih ve saat değerlerini `datetime` nesnesi olarak yönet; veritabanında native `DATE`/`TIMESTAMP` tipinde sakla, arayüzde ve API çıktılarında `gün/ay/yıl` (DD/MM/YYYY) formatında göster.
+
+# Kod Kalitesi ve Mimari Standartlar
+- Kodlar temiz, modüler, okunabilir olacak ve değişken/fonksiyon isimleri İngilizce seçilecek.
+- Tüm fonksiyon ve metodlarda type hinting zorunludur.
+- Her büyük ve kritik fonksiyon için açıklayıcı docstring ekle.
+- Kullanılan her dosyanın en üstüne (file-level) dosyanın amacını ve ne işe yaradığını açıklayan yorum satırı ekle.
+- Validasyon kurallarını backend (Pydantic) ve frontend (Angular Validators) tarafında ayrı dosyalarda yönet.
+
+# Hata Yönetimi ve Loglama
+- Hata yönetimi için FastAPI global exception handler mekanizmasını kullan; her fonksiyona tekrar eden try-except blokları yazmaktan kaçın.
+- Tüm loglar `C:\Kadir\KINSURE\logs` klasöründe tutulacak; normal işlemler ve hatalar için ayrı log dosyaları (operations.log, errors.log) oluşturulacak.
+
+# Arayüz ve Tasarım Kuralları
+- Frontend ekranlarında ana renk paleti olarak lacivert, beyaz, siyah ve gri tonlarını kullan.
+- Ekranlardaki görselleri `C:\Kadir\KINSURE\images` klasöründen dinamik ve parametrik olarak çağır.
+- requirements.txt ve Dockerfile dosyalarını her zaman güncelle ve güncellenen dosyaları commit et.
+
+- passlib kütüphanesini (özellikle bcrypt veya argon2 algoritmalarını kullan)

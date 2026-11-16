@@ -1,0 +1,1 @@
+.cursorrules dosyamdaki kurallara ve PROJE_TANIMI.md dosyasındaki tüm iş kurallarına, veritabanı şemalarına ve ekran gereksinimlerine tam bağlı kalarak KINSURE projemiz için FastAPI backend yapısını, veritabanı bağlantı katmanını ve tabloların CRUD servislerini (usersins, customer, product_types, policies, claims) sırasıyla oluşturmaya başla.

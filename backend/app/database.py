@@ -50,6 +50,8 @@ def get_connection() -> Generator[Connection, None, None]:
         )
     connection = _pool.acquire()
     try:
+        with connection.cursor() as cursor:
+            cursor.execute("ALTER SESSION SET TIME_ZONE = 'Europe/Istanbul'")
         yield connection
     except Exception:
         connection.rollback()

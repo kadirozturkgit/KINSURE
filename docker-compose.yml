@@ -12,6 +12,7 @@ services:
     environment:
       DATABASE_DSN: oracle:1521/FREEPDB1
       LOG_DIRECTORY: /app/logs
+      TZ: Europe/Istanbul
     volumes:
       - ./logs:/app/logs
     depends_on:

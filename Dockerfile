@@ -1,9 +1,14 @@
 # Container image for the KINSURE FastAPI backend.
 FROM python:3.10-slim
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    LOG_DIRECTORY=/app/logs
+    LOG_DIRECTORY=/app/logs \
+    TZ=Europe/Istanbul
 
 WORKDIR /app
 

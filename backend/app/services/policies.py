@@ -95,11 +95,13 @@ def create_policy(
             """,
             {
                 **policy.model_dump(),
+                "start_date": policy.start_date,
+                "end_date": policy.end_date,
                 "created_by": created_by,
                 "policy_id": policy_id_variable,
             },
         )
-        policy_id = int(policy_id_variable.getvalue())
+        policy_id = int(policy_id_variable.getvalue()[0])
     connection.commit()
     created_policy = get_policy(connection, policy_id)
     if created_policy is None:
@@ -122,6 +124,9 @@ def update_policy(
             status_code=400,
             detail="Güncellenecek en az bir alan gönderilmelidir.",
         )
+    for field in ("start_date", "end_date"):
+        if field in values:
+            values[field] = getattr(changes, field)
     if "product_type" in values:
         product = fetch_one(
             connection,
